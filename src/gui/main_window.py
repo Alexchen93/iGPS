@@ -153,7 +153,7 @@ class MainWindow(QMainWindow):
         left_layout.addWidget(self.device_bar)
 
         # Control panel (fills remaining sidebar space directly, no scroll wrapper)
-        self.control_panel = ControlPanel()
+        self.control_panel = ControlPanel(config=self.config)
         left_layout.addWidget(self.control_panel, 1)
 
         root_layout.addWidget(self.left_container)
@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
         map_layout.setSpacing(0)
 
         # Map widget fills the container
-        self.map_widget = MapWidget(self.map_container)
+        self.map_widget = MapWidget(self.map_container, config=self.config)
         map_layout.addWidget(self.map_widget, 0, 0)
 
         root_layout.addWidget(self.map_container, 1)

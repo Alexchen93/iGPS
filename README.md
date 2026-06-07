@@ -1,41 +1,74 @@
-# iGPS 定位控制台
+# iGPS — iPhone GPS Location Simulator for Linux
 
-基於 [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator) 開發的 iPhone GPS 定位模擬器，專為 Linux 環境改寫與增強。
+Based on [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator), rewritten and enhanced for Linux.
 
-## 原作者
+> 基於 marcelafsar/iphone-location-simulator，專為 Linux 環境改寫與增強的 iPhone GPS 定位控制台。
+
+## Original Author
 
 **Marcel Afsar** — [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator)
 
-## 功能
+## Features / 功能
 
-- iPhone 13 (iOS 17+) GPS 定位模擬
-- 地圖路線規劃與模擬（步行 / 騎車 / 開車 / 高速公路）
-- 區域漫遊（指定半徑內持續移動）
-- 搖桿微調方向
-- 位置凍結與重置
-- 折疊式側欄導航（SVG 圖示）
-- QComboBox 深色主題
+- iPhone GPS location simulation via `pymobiledevice3` (iOS 17+ DVT / RSD tunnel)
+- Route planning with address search (walking / cycling / driving / highway)
+- Area roaming (continuous movement within a radius)
+- Joystick directional control
+- Location freeze / reset
+- Collapsible sidebar with SVG icons
+- Dark-themed QComboBox dropdowns
+- Right-click context menu on map
+- Auto-cleanup on exit (tunneld + port release)
 
-## 技術棧
+## Tech Stack / 技術棧
 
-- Python 3.12 + PyQt6 + QtWebEngine
-- Leaflet 地圖
-- pymobiledevice3（iPhone 連線 / RSD tunnel）
+| Layer | Tech |
+|---|---|
+| Language | Python 3.12 |
+| GUI | PyQt6 + QtWebEngine (Leaflet.js) |
+| Device | pymobiledevice3 |
+| Map tiles | OpenStreetMap / CartoDB |
+| Platform | Linux (tested on Ubuntu 24.04) |
 
-## 快速開始
+## Quick Start / 快速開始
 
 ```bash
-# 啟動 (自動建立 RSD tunnel + GUI)
+# Start (auto-setup RSD tunnel + launch GUI)
 ./start.sh
 
-# 關閉
-./stop.sh
+# Diagnostics only (no launch)
+./start.sh --check
 ```
 
-## 需求
+Close the GUI window to automatically clean up all processes.
 
-- Linux（已在 Ubuntu 24.04 測試）
+## Requirements / 需求
+
+- Linux (Ubuntu 24.04 tested)
 - Python 3.12+
-- iPhone 開啟開發者模式
-- USB 連線
-- `sudo` 權限（tunneld 需要 root）
+- iPhone with Developer Mode enabled
+- USB connection
+- `sudo` access (tunneld requires root)
+
+## Project Structure / 專案結構
+
+```
+src/
+├── main.py                    # Entry point
+├── gui/
+│   ├── main_window.py         # Main window + layout
+│   ├── control_panel.py       # Sidebar navigation + 4 sub-pages
+│   ├── map_widget.py          # QtWebEngine + Leaflet bridge
+│   ├── map_template.html      # Leaflet map HTML/JS
+│   ├── style.qss              # Global dark theme
+│   └── icons/                 # SVG vector icons (25)
+├── core/
+│   ├── device_manager.py      # iPhone connection (tunnel/RSD)
+│   ├── location_controller.py # GPX generation + pymobiledevice3
+│   ├── coordinate_utils.py    # Distance calculation
+│   └── route_generator.py     # Route waypoint generation
+└── utils/
+    ├── config_manager.py      # config.yaml loader
+    ├── logger.py              # Logging setup
+    └── gpx_handler.py         # GPX file I/O
+```

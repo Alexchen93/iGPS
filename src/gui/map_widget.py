@@ -41,12 +41,18 @@ class MapWidget(QWidget):
     coordinate_context_menu_requested = pyqtSignal(float, float)
     mouse_moved = pyqtSignal(float, float)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, config=None):
         super().__init__(parent)
 
-        self.center_lat = 22.7826
-        self.center_lon = 120.4038
-        self.zoom = 15
+        if config:
+            mc = config.get("map.default_center", {})
+            self.center_lat = mc.get("latitude", 22.7826)
+            self.center_lon = mc.get("longitude", 120.4038)
+            self.zoom = config.get("map.default_zoom", 15)
+        else:
+            self.center_lat = 22.7826
+            self.center_lon = 120.4038
+            self.zoom = 15
         self._is_loaded = False
         self._pending_commands: List[str] = []
         self._map_server = None

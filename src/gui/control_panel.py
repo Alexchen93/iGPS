@@ -127,8 +127,9 @@ class ControlPanel(QWidget):
         ("page_system",   str(_ICONS / "settings.svg"), "系統控制"),
     ]
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, config=None):
         super().__init__(parent)
+        self._config = config
         self._nav_buttons: dict = {}
         self._create_layout()
         self._create_pages()
@@ -290,28 +291,28 @@ class ControlPanel(QWidget):
         self.lat_input = QDoubleSpinBox()
         self.lat_input.setRange(-90, 90)
         self.lat_input.setDecimals(6)
-        self.lat_input.setValue(22.7826)
+        self.lat_input.setValue(self._config.get("map.default_center.latitude", 22.7826) if self._config else 22.7826)
         grid.addWidget(self.lat_input, 0, 1)
 
         grid.addWidget(QLabel("起點經度："), 0, 2)
         self.lon_input = QDoubleSpinBox()
         self.lon_input.setRange(-180, 180)
         self.lon_input.setDecimals(6)
-        self.lon_input.setValue(120.4038)
+        self.lon_input.setValue(self._config.get("map.default_center.longitude", 120.4038) if self._config else 120.4038)
         grid.addWidget(self.lon_input, 0, 3)
 
         grid.addWidget(QLabel("終點緯度："), 1, 0)
         self.end_lat_input = QDoubleSpinBox()
         self.end_lat_input.setRange(-90, 90)
         self.end_lat_input.setDecimals(6)
-        self.end_lat_input.setValue(22.7926)
+        self.end_lat_input.setValue(self._config.get("map.default_center.latitude", 22.7826) + 0.01 if self._config else 22.7926)
         grid.addWidget(self.end_lat_input, 1, 1)
 
         grid.addWidget(QLabel("終點經度："), 1, 2)
         self.end_lon_input = QDoubleSpinBox()
         self.end_lon_input.setRange(-180, 180)
         self.end_lon_input.setDecimals(6)
-        self.end_lon_input.setValue(120.4138)
+        self.end_lon_input.setValue(self._config.get("map.default_center.longitude", 120.4038) + 0.01 if self._config else 120.4138)
         grid.addWidget(self.end_lon_input, 1, 3)
         c_layout.addLayout(grid)
 
