@@ -14,7 +14,9 @@ from PyQt6.QtCore import Qt, pyqtSignal, QSize
 from PyQt6.QtGui import QFont, QIcon
 from loguru import logger
 from core.coordinate_utils import CoordinateUtils
+from pathlib import Path
 
+_ICONS = Path(__file__).parent / "icons"
 
 class NavButton(QPushButton):
     """側欄導航按鈕 (SVG icon)"""
@@ -119,10 +121,10 @@ class ControlPanel(QWidget):
     roam_radius_changed = pyqtSignal(float, float, float)
 
     PAGES = [
-        ("page_location", r"/home/alex/文件/iphone-location-simulator/src/gui/icons/route.svg",    "定位路線"),
-        ("page_roam",     r"/home/alex/文件/iphone-location-simulator/src/gui/icons/roam.svg",     "區域漫遊"),
-        ("page_joystick", r"/home/alex/文件/iphone-location-simulator/src/gui/icons/joystick.svg", "搖桿控制"),
-        ("page_system",   r"/home/alex/文件/iphone-location-simulator/src/gui/icons/settings.svg", "系統控制"),
+        ("page_location", str(_ICONS / "route.svg"),    "定位路線"),
+        ("page_roam",     str(_ICONS / "roam.svg"),     "區域漫遊"),
+        ("page_joystick", str(_ICONS / "joystick.svg"), "搖桿控制"),
+        ("page_system",   str(_ICONS / "settings.svg"), "系統控制"),
     ]
 
     def __init__(self, parent=None):
@@ -261,7 +263,7 @@ class ControlPanel(QWidget):
         s_layout.addWidget(self.search_input)
 
         self.search_btn = QPushButton("搜尋並設為起點")
-        self.search_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/search.svg"))
+        self.search_btn.setIcon(QIcon(str(_ICONS / "search.svg")))
         self.search_btn.clicked.connect(lambda: self._on_search(is_dest=False))
         s_layout.addWidget(self.search_btn)
 
@@ -271,7 +273,7 @@ class ControlPanel(QWidget):
         s_layout.addWidget(self.dest_search_input)
 
         self.dest_search_btn = QPushButton("搜尋並設為終點")
-        self.dest_search_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/search.svg"))
+        self.dest_search_btn.setIcon(QIcon(str(_ICONS / "search.svg")))
         self.dest_search_btn.clicked.connect(lambda: self._on_search(is_dest=True))
         s_layout.addWidget(self.dest_search_btn)
 
@@ -315,29 +317,29 @@ class ControlPanel(QWidget):
 
         btn_row = QHBoxLayout()
         self.set_location_btn = QPushButton("移動到起點")
-        self.set_location_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/location.svg"))
+        self.set_location_btn.setIcon(QIcon(str(_ICONS / "location.svg")))
         self.set_location_btn.clicked.connect(self._on_set_location)
         btn_row.addWidget(self.set_location_btn)
         self.copy_loc_btn = QPushButton("複製起點")
-        self.copy_loc_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/copy.svg"))
+        self.copy_loc_btn.setIcon(QIcon(str(_ICONS / "copy.svg")))
         self.copy_loc_btn.clicked.connect(self._on_copy_location)
         btn_row.addWidget(self.copy_loc_btn)
         c_layout.addLayout(btn_row)
 
         map_pick_row = QHBoxLayout()
         self.pick_start_btn = QPushButton("地圖選起點")
-        self.pick_start_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/target.svg"))
+        self.pick_start_btn.setIcon(QIcon(str(_ICONS / "target.svg")))
         self.pick_start_btn.clicked.connect(lambda: self.map_pick_requested.emit("start"))
         map_pick_row.addWidget(self.pick_start_btn)
 
         self.pick_dest_btn = QPushButton("地圖選終點")
-        self.pick_dest_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/route.svg"))
+        self.pick_dest_btn.setIcon(QIcon(str(_ICONS / "route.svg")))
         self.pick_dest_btn.clicked.connect(lambda: self.map_pick_requested.emit("destination"))
         map_pick_row.addWidget(self.pick_dest_btn)
         c_layout.addLayout(map_pick_row)
 
         self.clear_map_btn = QPushButton("清除地圖標示")
-        self.clear_map_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/reset.svg"))
+        self.clear_map_btn.setIcon(QIcon(str(_ICONS / "reset.svg")))
         self.clear_map_btn.clicked.connect(self.map_overlays_clear_requested.emit)
         c_layout.addWidget(self.clear_map_btn)
 
@@ -394,7 +396,7 @@ class ControlPanel(QWidget):
         route_layout.addWidget(self.stops_checkbox)
 
         self.walk_btn = QPushButton("計算路線並開始移動")
-        self.walk_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/play.svg"))
+        self.walk_btn.setIcon(QIcon(str(_ICONS / "play.svg")))
         self.walk_btn.setObjectName("walk_btn")
         self.walk_btn.setMinimumHeight(44)
         self.walk_btn.clicked.connect(self._on_walk_simulation)
@@ -440,12 +442,12 @@ class ControlPanel(QWidget):
         r_layout.addWidget(self.radius_slider)
 
         self.pick_roam_center_btn = QPushButton("地圖選漫遊中心")
-        self.pick_roam_center_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/target.svg"))
+        self.pick_roam_center_btn.setIcon(QIcon(str(_ICONS / "target.svg")))
         self.pick_roam_center_btn.clicked.connect(lambda: self.map_pick_requested.emit("roam"))
         r_layout.addWidget(self.pick_roam_center_btn)
 
         self.clear_roam_map_btn = QPushButton("清除地圖標示")
-        self.clear_roam_map_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/reset.svg"))
+        self.clear_roam_map_btn.setIcon(QIcon(str(_ICONS / "reset.svg")))
         self.clear_roam_map_btn.clicked.connect(self.map_overlays_clear_requested.emit)
         r_layout.addWidget(self.clear_roam_map_btn)
 
@@ -484,13 +486,13 @@ class ControlPanel(QWidget):
         # 按鈕
         btn_row = QHBoxLayout()
         self.start_roam_btn = QPushButton("開始漫遊")
-        self.start_roam_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/walk.svg"))
+        self.start_roam_btn.setIcon(QIcon(str(_ICONS / "walk.svg")))
         self.start_roam_btn.setMinimumHeight(40)
         self.start_roam_btn.clicked.connect(self._on_start_roaming)
         btn_row.addWidget(self.start_roam_btn)
 
         self.stop_roam_btn = QPushButton("停止漫遊")
-        self.stop_roam_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/stop.svg"))
+        self.stop_roam_btn.setIcon(QIcon(str(_ICONS / "stop.svg")))
         self.stop_roam_btn.setMinimumHeight(40)
         self.stop_roam_btn.clicked.connect(self._on_stop)
         btn_row.addWidget(self.stop_roam_btn)
@@ -585,14 +587,14 @@ class ControlPanel(QWidget):
         c_layout.setSpacing(8)
 
         self.stop_btn = QPushButton("停止模擬")
-        self.stop_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/stop.svg"))
+        self.stop_btn.setIcon(QIcon(str(_ICONS / "stop.svg")))
         self.stop_btn.setObjectName("stop_btn")
         self.stop_btn.setMinimumHeight(40)
         self.stop_btn.clicked.connect(self._on_stop)
         c_layout.addWidget(self.stop_btn)
 
         self.clear_btn = QPushButton("重置 GPS（恢復真實位置）")
-        self.clear_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/reset.svg"))
+        self.clear_btn.setIcon(QIcon(str(_ICONS / "reset.svg")))
         self.clear_btn.setObjectName("clear_btn")
         self.clear_btn.setMinimumHeight(40)
         self.clear_btn.clicked.connect(self._on_clear)
@@ -607,7 +609,7 @@ class ControlPanel(QWidget):
         f_layout.setSpacing(6)
 
         self.freeze_btn = QPushButton("凍結位置")
-        self.freeze_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/snowflake.svg"))
+        self.freeze_btn.setIcon(QIcon(str(_ICONS / "snowflake.svg")))
         self.freeze_btn.setObjectName("freeze_btn")
         self.freeze_btn.setMinimumHeight(40)
         self.freeze_btn.clicked.connect(self._on_freeze)

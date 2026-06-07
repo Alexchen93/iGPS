@@ -15,6 +15,9 @@ from loguru import logger
 
 from core.device_manager import DeviceManager
 from core.location_controller import LocationController
+from pathlib import Path
+
+_ICONS = Path(__file__).parent / "icons"
 from gui.control_panel import ControlPanel
 from gui.map_widget import MapWidget
 from utils.config_manager import ConfigManager
@@ -198,7 +201,7 @@ class MainWindow(QMainWindow):
 
         self.interrupt_pin_btn = QPushButton("中斷並固定當前位置")
         self.interrupt_pin_btn.setObjectName("interrupt_pin_btn")
-        self.interrupt_pin_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/stop.svg"))
+        self.interrupt_pin_btn.setIcon(QIcon(str(_ICONS / "stop.svg")))
         self.interrupt_pin_btn.clicked.connect(self._on_interrupt_and_pin)
         self.interrupt_pin_btn.hide()
         status_layout.addWidget(self.interrupt_pin_btn)
@@ -288,7 +291,7 @@ class MainWindow(QMainWindow):
         # Direct map-to-phone location button
         self.direct_loc_btn = QPushButton("直接定位")
         self.direct_loc_btn.setObjectName("direct_loc_btn")
-        self.direct_loc_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/target.svg"))
+        self.direct_loc_btn.setIcon(QIcon(str(_ICONS / "target.svg")))
         self.direct_loc_btn.setIconSize(QSize(16, 16))
         self.direct_loc_btn.setToolTip("按下後，在地圖左鍵點擊即可直接設定手機位置")
         self.direct_loc_btn.clicked.connect(self._on_direct_location_requested)
@@ -308,7 +311,7 @@ class MainWindow(QMainWindow):
         self.toggle_menu_btn.setObjectName("toggle_menu_btn")
         self.toggle_menu_btn.setFixedSize(32, 32)
         self.toggle_menu_btn.setIconSize(QSize(18, 18))
-        self.toggle_menu_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/sidebar-collapse.svg"))
+        self.toggle_menu_btn.setIcon(QIcon(str(_ICONS / "sidebar-collapse.svg")))
         self.toggle_menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.toggle_menu_btn.setToolTip("隱藏左側欄")
         self.toggle_menu_btn.setStyleSheet("""
@@ -339,7 +342,7 @@ class MainWindow(QMainWindow):
             self.device_status_label.show()
             self.direct_loc_btn.show()
             self.connect_btn.show()
-            self.toggle_menu_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/sidebar-collapse.svg"))
+            self.toggle_menu_btn.setIcon(QIcon(str(_ICONS / "sidebar-collapse.svg")))
             self.toggle_menu_btn.setToolTip("隱藏左側欄")
             self.control_panel.set_collapsed(False)
         else:
@@ -348,7 +351,7 @@ class MainWindow(QMainWindow):
             self.battery_label.hide()
             self.direct_loc_btn.hide()
             self.connect_btn.hide()
-            self.toggle_menu_btn.setIcon(QIcon(r"/home/alex/文件/iphone-location-simulator/src/gui/icons/sidebar-expand.svg"))
+            self.toggle_menu_btn.setIcon(QIcon(str(_ICONS / "sidebar-expand.svg")))
             self.toggle_menu_btn.setToolTip("展開左側欄")
             self.control_panel.set_collapsed(True)
 

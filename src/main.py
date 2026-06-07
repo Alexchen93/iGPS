@@ -59,7 +59,7 @@ def _cleanup_orphan_processes():
                                 capture_output=True, timeout=5,
                                 creationflags=subprocess.CREATE_NO_WINDOW
                             )
-                            print(f"[Startup Cleanup] Killed orphaned simulate-location process PID {pid}")
+                            logger.warning(f"Killed orphaned simulate-location process PID {pid}")
                         except Exception:
                             pass
         else:
@@ -68,10 +68,10 @@ def _cleanup_orphan_processes():
                 ["pkill", "-f", "simulate-location.*play"],
                 capture_output=True, timeout=5
             )
-            print("[Startup Cleanup] Cleaned up orphaned location processes (macOS/Linux)")
+            logger.warning("Cleaned up orphaned location processes (macOS/Linux)")
     except Exception as e:
         # Not critical — just log and continue
-        print(f"[Startup Cleanup] Could not scan for orphans: {e}")
+        logger.warning(f"Could not scan for orphans: {e}")
 
 
 def _clear_stale_simulation():
@@ -112,7 +112,7 @@ def _clear_stale_simulation():
                     cmd, capture_output=True, timeout=8,
                     creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
                 )
-                print(f"[Startup Cleanup] Cleared stale GPS simulation on device {udid[:8]}...")
+                logger.warning(f"Cleared stale GPS simulation on device {udid[:8]}...")
             break  # only first device
     except Exception:
         pass  # silent — phone might not be connected

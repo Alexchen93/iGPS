@@ -13,6 +13,31 @@ echo "╚═══════════════════════�
 echo ""
 
 # ── 步驟 1：先取得 sudo ──
+# Optional: --check mode (diagnose only, no start)
+if [ "$1" = "--check" ]; then
+    echo ""
+    echo "--- Diagnostics ---"
+    echo ""
+    if .venv/bin/python -m pymobiledevice3 --version >/dev/null 2>&1; then
+        echo "[OK] pymobiledevice3 installed"
+    else
+        echo "[FAIL] pymobiledevice3 missing"
+    fi
+    if .venv/bin/python -m pymobiledevice3 usbmux list 2>/dev/null | grep -q iPhone; then
+        echo "[OK] iPhone connected via USB"
+    else
+        echo "[WARN] iPhone not detected"
+    fi
+    DEV_MODE=$(cd "$PROJECT_DIR" && .venv/bin/python -m pymobiledevice3 amfi developer-mode-status 2>/dev/null)
+    if [ "$DEV_MODE" = "true" ]; then
+        echo "[OK] Developer Mode enabled"
+    else
+        echo "[WARN] Developer Mode not enabled"
+    fi
+    echo ""
+    exit 0
+fi
+
 echo "── 步驟 1/3：驗證權限 ──"
 echo "⚠️  需要 sudo 權限，請輸入密碼"
 echo ""
@@ -100,3 +125,42 @@ echo ""
 echo "（關閉此終端機不會影響 GUI，可直接關閉）"
 echo ""
 read -p "按 Enter 關閉此視窗..."
+
+# Optional: run with --check to only diagnose, not start
+if [ "$1" = "--check" ]; then
+    echo ""
+    echo "── 診斷模式 ──"
+    echo ""
+    
+    # Check pymobiledevice3
+    if .venv/bin/python -m pymobiledevice3 --version >/dev/null 2>&1; then
+        echo "✅ pymobiledevice3 已安裝"
+    else
+        echo "❌ pymobiledevice3 未安裝"
+    fi
+    
+    # Check USB device
+    if .venv/bin/python -m pymobiledevice3 usbmux list 2>/dev/null | grep -q "iPhone"; then
+        echo "✅ iPhone 已透過 USB 連接"
+    else
+        echo "⚠️  未偵測到 iPhone USB 連線"
+    fi
+    
+    # Check tunneld port
+    if ss -tlnp 2>/dev/null | grep -q 49151; then
+        echo "✅ Tunneld port 49151 已監聽"
+    else
+        echo "⚠️  Tunneld port 49151 未監聽"
+    fi
+    
+    # Check developer mode
+    DEV_MODE=$(.venv/bin/python -m pymobiledevice3 amfi developer-mode-status 2>/dev/null)
+    if [ "$DEV_MODE" = "true" ]; then
+        echo "✅ iPhone 開發者模式已開啟"
+    else
+        echo "⚠️  iPhone 開發者模式未開啟"
+    fi
+    
+    echo ""
+    exit 0
+fi
