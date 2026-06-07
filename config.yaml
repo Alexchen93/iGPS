@@ -34,3 +34,21 @@ ui:
   show_tooltips: true
   window_height: 850
   window_width: 1200
+
+# ── Roam defaults ──
+roam:
+  default_radius: 500
+  default_duration: 30
+  default_speed: 35.0
+  walking_speed: 5.0
+  highway_speed: 80.0
+
+# ── Route speed presets [min, max, default] ──
+route:
+  default_transport: driving
+  default_interval: 1.0
+  speed_presets:
+    walking: [10, 80, 50]
+    cycling: [10, 300, 150]
+    driving: [10, 500, 350]
+    highway: [10, 900, 800]

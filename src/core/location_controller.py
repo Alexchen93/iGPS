@@ -16,6 +16,8 @@ from loguru import logger
 
 from core.device_manager import DeviceManager
 from core.coordinate_utils import CoordinateUtils
+from core.gpx_builder import create_single_point_gpx, densify_waypoints, create_route_gpx
+from core.route_fetcher import fetch_road_route
 
 
 class LocationController:
@@ -126,96 +128,16 @@ class LocationController:
             logger.error(f"GPX player [{label}] stderr tail:\n{stderr}")
 
     def _create_gpx_file(self, latitude: float, longitude: float) -> str:
-        """
-        Generate a long-duration single-location GPX file.
-
-        Uses two identical waypoints 24 hours apart so the GPX play process
-        stays alive indefinitely — the iPhone holds the spoofed location
-        without reverting to real GPS between joystick keystrokes.
-        """
-        from datetime import datetime, timedelta
-        t1 = datetime.utcnow()
-        t2 = t1 + timedelta(hours=24)
-        gpx_content = f"""<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="iGPS"
-     xmlns="http://www.topografix.com/GPX/1/1"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
-  <trk>
-    <name>Location</name>
-    <trkseg>
-      <trkpt lat="{latitude}" lon="{longitude}">
-        <time>{t1.isoformat()}Z</time>
-      </trkpt>
-      <trkpt lat="{latitude}" lon="{longitude}">
-        <time>{t2.isoformat()}Z</time>
-      </trkpt>
-    </trkseg>
-  </trk>
-</gpx>"""
-        temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.gpx', delete=False)
-        temp_file.write(gpx_content)
-        temp_file.close()
-        return temp_file.name
+        """Generate a long-duration single-location GPX file."""
+        return create_single_point_gpx(latitude, longitude)
 
     def _densify_waypoints(self, waypoints: List[Tuple[float, float, float]], max_gap_sec: float = 1.0) -> List[Tuple[float, float, float]]:
-        """
-        Interpolates waypoints to ensure no two consecutive points are separated by more than max_gap_sec.
-        This prevents Apple Maps from dropping the GPS signal on long straight roads.
-        """
-        if not waypoints:
-            return []
-            
-        densified = [waypoints[0]]
-        for i in range(1, len(waypoints)):
-            prev = waypoints[i - 1]
-            curr = waypoints[i]
-            
-            time_gap = curr[2] - prev[2]
-            if time_gap > max_gap_sec:
-                # Need to insert intermediate points
-                num_inserts = int(time_gap // max_gap_sec)
-                for j in range(1, num_inserts + 1):
-                    fraction = j / (num_inserts + 1)
-                    interp_lat = prev[0] + (curr[0] - prev[0]) * fraction
-                    interp_lon = prev[1] + (curr[1] - prev[1]) * fraction
-                    interp_time = prev[2] + time_gap * fraction
-                    densified.append((interp_lat, interp_lon, interp_time))
-                    
-            densified.append(curr)
-            
-        return densified
+        """Interpolate waypoints to prevent GPS signal drops on long straight roads."""
+        return densify_waypoints(waypoints, max_gap_sec)
 
     def _create_route_gpx_file(self, waypoints: list) -> str:
-        """
-        Generate a multi-point route GPX file.
-        Args:
-            waypoints: List of (lat, lon, time_offset_seconds)
-        """
-        from datetime import datetime, timedelta
-        gpx_content = """<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="iGPS"
-     xmlns="http://www.topografix.com/GPX/1/1"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
-  <trk>
-    <name>Route</name>
-    <trkseg>
-"""
-        start_time = datetime.utcnow()
-        for lat, lon, time_offset in waypoints:
-            point_time = start_time + timedelta(seconds=time_offset)
-            gpx_content += f"""      <trkpt lat="{lat}" lon="{lon}">
-        <time>{point_time.isoformat()}Z</time>
-      </trkpt>
-"""
-        gpx_content += """    </trkseg>
-  </trk>
-</gpx>"""
-        temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.gpx', delete=False)
-        temp_file.write(gpx_content)
-        temp_file.close()
-        return temp_file.name
+        """Generate a multi-point route GPX file."""
+        return create_route_gpx(waypoints)
 
     def _get_road_route(
         self,

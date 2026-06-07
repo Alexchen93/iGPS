@@ -438,7 +438,7 @@ class ControlPanel(QWidget):
 
         self.radius_slider = QSlider(Qt.Orientation.Horizontal)
         self.radius_slider.setRange(50, 5000)
-        self.radius_slider.setValue(500)
+        self.radius_slider.setValue(self._config.get("roam.default_radius", 500) if self._config else 500)
         self.radius_slider.valueChanged.connect(self._on_radius_changed)
         r_layout.addWidget(self.radius_slider)
 
@@ -477,7 +477,7 @@ class ControlPanel(QWidget):
         d_row.addWidget(QLabel("時間："))
         self.duration_input = QDoubleSpinBox()
         self.duration_input.setRange(1.0, 1440.0)
-        self.duration_input.setValue(30.0)
+        self.duration_input.setValue(float(self._config.get("roam.default_duration", 30)) if self._config else 30.0)
         self.duration_input.setSuffix(" min")
         d_row.addWidget(self.duration_input)
         p_layout.addLayout(d_row)
@@ -667,12 +667,16 @@ class ControlPanel(QWidget):
     def _on_mode_changed(self, index: int):
         if index == 0:
             return
-        config = [
-            (80, 50), (300, 150), (500, 350), (900, 800)
-        ]
+        # Read speed presets from config or use defaults
+        if self._config:
+            presets = self._config.get("route.speed_presets", {})
+            keys = ["walking", "cycling", "driving", "highway"]
+            config_list = [tuple(presets.get(k, [10, 500, 350])[1:]) for k in keys]
+        else:
+            config_list = [(80, 50), (300, 150), (500, 350), (900, 800)]
         cfg_idx = index - 1
-        if 0 <= cfg_idx < len(config):
-            max_val, default_val = config[cfg_idx]
+        if 0 <= cfg_idx < len(config_list):
+            max_val, default_val = config_list[cfg_idx]
             self.speed_slider.blockSignals(True)
             self.speed_slider.setRange(10, max_val)
             self.speed_slider.setValue(default_val)
@@ -748,8 +752,18 @@ class ControlPanel(QWidget):
         radius = float(self.radius_slider.value())
         duration = self.duration_input.value()
         idx = self.roam_speed_combo.currentIndex()
-        mode_map = {0: ('walking', 5.0), 1: ('cycling', 15.0), 2: ('driving', 35.0), 3: ('highway', 80.0)}
-        mode, speed = mode_map.get(idx, ('driving', 35.0))
+        # Read speeds from config or use defaults
+        if self._config:
+            s = self._config.get("roam", {})
+            speeds = {
+                0: ('walking', s.get("walking_speed", 5.0)),
+                1: ('cycling', s.get("cycling_speed", 15.0)),
+                2: ('driving', s.get("default_speed", 35.0)),
+                3: ('highway', s.get("highway_speed", 80.0)),
+            }
+        else:
+            speeds = {0: ('walking', 5.0), 1: ('cycling', 15.0), 2: ('driving', 35.0), 3: ('highway', 80.0)}
+        mode, speed = speeds.get(idx, ('driving', 35.0))
         self.roam_requested.emit(lat, lon, radius, duration, speed, mode)
 
     def _on_copy_location(self):
