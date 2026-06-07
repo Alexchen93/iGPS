@@ -861,15 +861,24 @@ class MainWindow(QMainWindow):
             self.statusBar.showMessage(f"已移動到 ({lat:.6f}, {lon:.6f})")
             
     def _on_stop(self):
-        """Stop simulation"""
+        """Stop simulation and pin phone at last known position."""
         self.map_widget.clear_radius_circle()
+        # Capture last position before stopping
+        pinned = self._last_runtime_position
+        if not pinned and self.location_controller:
+            pinned = self.location_controller.get_current_location()
         if self.location_controller:
             self.location_controller.stop_simulation()
             if self.walk_thread and self.walk_thread.isRunning():
                 self.walk_thread.terminate()
                 self.walk_thread.wait()
-            self._set_runtime_state("已停止")
-            self.statusBar.showMessage("模擬已停止")
+            # Pin phone at last position so it does not revert to real GPS
+            if pinned and self.device_manager.is_connected():
+                lat, lon = pinned
+                self.location_controller.set_location(lat, lon)
+                self.map_widget.add_marker(lat, lon)
+        self._set_runtime_state("已停止")
+        self.statusBar.showMessage("模擬已停止")
     
     def _on_clear(self):
         """Reset GPS to real location"""

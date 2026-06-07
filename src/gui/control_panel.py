@@ -492,11 +492,6 @@ class ControlPanel(QWidget):
         self.start_roam_btn.clicked.connect(self._on_start_roaming)
         btn_row.addWidget(self.start_roam_btn)
 
-        self.stop_roam_btn = QPushButton("停止漫遊")
-        self.stop_roam_btn.setIcon(QIcon(str(_ICONS / "stop.svg")))
-        self.stop_roam_btn.setMinimumHeight(40)
-        self.stop_roam_btn.clicked.connect(self._on_stop)
-        btn_row.addWidget(self.stop_roam_btn)
         layout.addLayout(btn_row)
 
         layout.addStretch()
@@ -823,7 +818,7 @@ class ControlPanel(QWidget):
             self.freeze_btn, self.search_btn, self.dest_search_btn, self.copy_loc_btn,
             self.pick_start_btn, self.pick_dest_btn, self.pick_roam_center_btn, self.clear_map_btn, self.clear_roam_map_btn,
             self.btn_up, self.btn_down, self.btn_left, self.btn_right,
-            self.stops_checkbox, self.start_roam_btn, self.stop_roam_btn,
+            self.stops_checkbox, self.start_roam_btn,
             self.radius_slider, self.duration_input, self.roam_speed_combo,
         ]
         for w in widgets:
