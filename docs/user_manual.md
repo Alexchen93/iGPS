@@ -1,4 +1,4 @@
-# Marcel Location Simulator - User Manual
+# iGPS - User Manual
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -14,7 +14,7 @@
 
 <a name="introduction"></a>
 ## 1. Introduction
-**Marcel Location Simulator** is a premium, high-performance desktop application designed for Windows to easily spoof and simulate GPS coordinates on Apple iPhones. Developed for developers, testers, and advanced users, it offers precise manual controls (using D-PAD/WASD keyboards) and realistic route simulations including simulated traffic stops.
+**iGPS** is a premium, high-performance desktop application designed for Windows to easily spoof and simulate GPS coordinates on Apple iPhones. Developed for developers, testers, and advanced users, it offers precise manual controls (using D-PAD/WASD keyboards) and realistic route simulations including simulated traffic stops.
 
 > [!WARNING]
 > This tool is intended for educational, testing, and development purposes only. Using location-spoofing utilities may violate the terms of service of various location-based applications.
@@ -77,7 +77,7 @@ To allow GPS simulation, Developer Mode must be turned on:
 ## 5. Basic Usage
 
 ### 1. Connecting Your Device
-- Open **Marcel Location Simulator**.
+- Open **iGPS**.
 - Click the **Connect** button in the floating top-left device bar.
 - The status bar will change to **Connected** and show your iPhone's name, model, iOS version, and current battery level.
 
@@ -135,5 +135,5 @@ A: Yes, an active internet connection is required to load map tiles and search c
 A: No. GPS spoofing is active only as long as simulated in the application. Clearing the simulation restores real coordinates.
 
 ---
-**Created by Marcel Afsar.**  
+**Created by Marcel Afsar (原作者).**  
 *Last updated: 2026. Version: 1.0.0*

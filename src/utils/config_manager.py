@@ -1,7 +1,7 @@
 """
-Configuration Manager - Marcel Location Simulator
+Configuration Manager - iGPS
 Handles loading, saving, and managing configuration parameters from config.yaml.
-Created by Marcel Afsar
+Created by Marcel Afsar (原作者)
 """
 
 import yaml
@@ -60,9 +60,9 @@ class ConfigManager:
         """
         return {
             'app': {
-                'name': 'Marcel Location Simulator',
+                'name': 'iGPS',
                 'version': '1.0.0',
-                'author': 'Marcel Afsar',
+                'author': 'Marcel Afsar (原作者)',
                 'language': 'en',
                 'theme': 'dark'
             },
@@ -75,8 +75,8 @@ class ConfigManager:
             'map': {
                 'default_zoom': 15,
                 'default_center': {
-                    'latitude': 40.7128,
-                    'longitude': -74.0060  # New York City
+                    'latitude': 22.7826,
+                    'longitude': 120.4038
                 },
                 'tile_layer': 'CartoDB'
             },

@@ -1,6 +1,6 @@
 """
 iPhone Device Connection Manager (Remote Tunneld / Windows / pymobiledevice3)
-Created by Marcel Afsar
+Created by Marcel Afsar (原作者)
 """
 
 from __future__ import annotations

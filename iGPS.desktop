@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=iGPS
+Comment=一鍵啟動 iPhone GPS 定位控制
+Exec=bash /home/alex/文件/iphone-location-simulator/start.sh
+Terminal=true
+Type=Application
+Icon=phone
+Categories=Utility;

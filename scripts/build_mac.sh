@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Marcel Location Simulator - macOS Build Script"
-echo "Created by Marcel Afsar"
+echo "iGPS - macOS Build Script"
+echo "Created by Marcel Afsar (原作者)"
 echo ""
 
 # Activate virtual environment

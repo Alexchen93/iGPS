@@ -1,7 +1,7 @@
 """
-Coordinate Utilities - Marcel Location Simulator
+Coordinate Utilities - iGPS
 Calculations for distances, bearings, destinations, and interpolation.
-Created by Marcel Afsar
+Created by Marcel Afsar (原作者)
 """
 
 import math

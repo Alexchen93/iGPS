@@ -1,7 +1,7 @@
 """
-Logger Configuration - Marcel Location Simulator
+Logger Configuration - iGPS
 Sets up beautiful loguru-based console and file-based structured logs.
-Created by Marcel Afsar
+Created by Marcel Afsar (原作者)
 """
 
 import sys

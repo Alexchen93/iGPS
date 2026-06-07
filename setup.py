@@ -1,5 +1,5 @@
 """
-Setup script for Marcel Location Simulator
+Setup script for iGPS
 """
 
 from setuptools import setup, find_packages
@@ -12,7 +12,7 @@ long_description = (this_directory / "README.md").read_text(encoding='utf-8')
 setup(
     name="iphone-location-simulator",
     version="1.0.0",
-    author="Marcel Afsar",
+    author="Marcel Afsar (原作者)",
     author_email="marcel.afsar@icloud.com",
     description="Premium iPhone GPS Location Simulator for Windows, macOS, and Linux",
     long_description=long_description,

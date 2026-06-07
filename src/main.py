@@ -1,7 +1,7 @@
 """
-Marcel Location Simulator
+iGPS
 Premium iPhone GPS Location Simulator for Windows
-Created by Marcel Afsar
+Created by Marcel Afsar (原作者)
 """
 
 import sys
@@ -159,7 +159,7 @@ def main():
     
     # Initialize logger
     logger = setup_logger()
-    logger.info("Starting Marcel Location Simulator...")
+    logger.info("Starting iGPS...")
 
     # Load configuration first
     config = ConfigManager()
@@ -184,9 +184,9 @@ def main():
         
         # Initialize Qt Application
         app = QApplication(sys.argv)
-        app.setApplicationName("Marcel Location Simulator")
+        app.setApplicationName("iGPS")
         app.setApplicationVersion(config.get('app.version'))
-        app.setOrganizationName("Marcel Afsar")
+        app.setOrganizationName("Marcel Afsar (原作者)")
         
         # Set default font
         font = QFont("Segoe UI", 10)

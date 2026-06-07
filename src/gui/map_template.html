@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Marcel Location Simulator - Map Viewer</title>
+    <title>iGPS 定位控制台 - 地圖</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Leaflet loaded from local bundled assets to avoid CDN failures on file:// pages -->
@@ -39,6 +39,22 @@
             border: 2px solid white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
+        .start-marker {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #34c759;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .inspect-marker {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #f59e0b;
+            border: 2px solid white;
+            box-shadow: 0 0 0 4px rgba(245,158,11,0.22), 0 2px 5px rgba(0,0,0,0.5);
+        }
         .leaflet-bar {
             border: none !important;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
@@ -53,6 +69,17 @@
             background-color: #2a2b35 !important;
             color: #2196F3 !important;
         }
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background: #14181F;
+            color: #E2E8F0;
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+        }
+        .leaflet-popup-content {
+            margin: 8px 10px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -63,9 +90,12 @@
     <script>
         var map;
         var currentPositionMarker = null;
+        var startPointMarker = null;
         var destinationMarker = null;
+        var inspectMarker = null;
         var routePolyline = null;
         var roamingCircle = null;
+        var lastMouseMoveSent = 0;
 
         function initMap(lat, lon, zoom) {
             if (map) { return; }  // guard against double-init
@@ -82,7 +112,13 @@
                 console.log("CLICK:START:" + e.latlng.lat + "," + e.latlng.lng);
             });
             map.on('contextmenu', function(e) {
-                console.log("CLICK:DEST:" + e.latlng.lat + "," + e.latlng.lng);
+                console.log("CLICK:INSPECT:" + e.latlng.lat + "," + e.latlng.lng);
+            });
+            map.on('mousemove', function(e) {
+                var now = Date.now();
+                if (now - lastMouseMoveSent < 120) { return; }
+                lastMouseMoveSent = now;
+                console.log("MOUSE:MOVE:" + e.latlng.lat + "," + e.latlng.lng);
             });
         }
 
@@ -106,6 +142,22 @@
             }
         }
 
+        function setStartPoint(lat, lon) {
+            if (!map) { return; }
+            var latlng = [lat, lon];
+            var startIcon = L.divIcon({
+                className: 'start-marker-container',
+                html: '<div class="start-marker"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            if (startPointMarker) {
+                startPointMarker.setLatLng(latlng);
+            } else {
+                startPointMarker = L.marker(latlng, { icon: startIcon }).addTo(map);
+            }
+        }
+
         function setDestination(lat, lon) {
             if (!map) { return; }
             var latlng = [lat, lon];
@@ -126,6 +178,26 @@
             }
         }
 
+        function markCoordinate(lat, lon) {
+            if (!map) { return; }
+            var latlng = [lat, lon];
+            var inspectIcon = L.divIcon({
+                className: 'inspect-marker-container',
+                html: '<div class="inspect-marker"></div>',
+                iconSize: [22, 22],
+                iconAnchor: [11, 11]
+            });
+            var popupText = lat.toFixed(6) + ', ' + lon.toFixed(6);
+            if (inspectMarker) {
+                inspectMarker.setLatLng(latlng);
+                inspectMarker.setPopupContent(popupText);
+            } else {
+                inspectMarker = L.marker(latlng, { icon: inspectIcon }).addTo(map);
+                inspectMarker.bindPopup(popupText);
+            }
+            inspectMarker.openPopup();
+        }
+
         function drawRoute(coordinatesJson) {
             if (!map) { return; }
             var coords = JSON.parse(coordinatesJson);
@@ -141,7 +213,9 @@
 
         function clearMap() {
             if (!map) { return; }
+            if (startPointMarker) { map.removeLayer(startPointMarker); startPointMarker = null; }
             if (destinationMarker) { map.removeLayer(destinationMarker); destinationMarker = null; }
+            if (inspectMarker) { map.removeLayer(inspectMarker); inspectMarker = null; }
             if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
             if (roamingCircle) { map.removeLayer(roamingCircle); roamingCircle = null; }
         }

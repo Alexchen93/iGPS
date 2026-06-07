@@ -1,7 +1,7 @@
 """
-Database Manager - Marcel Location Simulator
+Database Manager - iGPS
 SQLite database management for saving locations and routes.
-Created by Marcel Afsar
+Created by Marcel Afsar (原作者)
 """
 
 from pathlib import Path

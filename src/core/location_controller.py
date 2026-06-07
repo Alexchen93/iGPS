@@ -1,8 +1,9 @@
 """
 Location Controller (GPX play method — flicker-free, road-snapping version)
-Created by Marcel Afsar
+Created by Marcel Afsar (原作者)
 """
 
+import sys
 import subprocess
 import threading
 import tempfile
@@ -77,6 +78,53 @@ class LocationController:
         except Exception as e:
             logger.debug(f"Error terminating old process: {e}")
 
+    def _start_gpx_player(self, cmd: list, label: str) -> Tuple[subprocess.Popen, str, str]:
+        """
+        Start pymobiledevice3 GPX playback and capture stdout/stderr to files.
+        Pipes are intentionally avoided so long-running playback cannot block
+        if the child process writes output.
+        """
+        log_dir = Path("data/logs/gpx_player")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        stamp = int(time.time() * 1000)
+        safe_label = "".join(ch if ch.isalnum() or ch in ("-", "_") else "_" for ch in label)
+        stdout_path = log_dir / f"{stamp}_{safe_label}.stdout.log"
+        stderr_path = log_dir / f"{stamp}_{safe_label}.stderr.log"
+
+        stdout_file = stdout_path.open("w", encoding="utf-8")
+        stderr_file = stderr_path.open("w", encoding="utf-8")
+        try:
+            process = subprocess.Popen(cmd, stdout=stdout_file, stderr=stderr_file)
+        finally:
+            stdout_file.close()
+            stderr_file.close()
+
+        logger.info(f"Started GPX player [{label}] pid={process.pid}")
+        logger.info(f"GPX player [{label}] stdout={stdout_path}")
+        logger.info(f"GPX player [{label}] stderr={stderr_path}")
+        return process, str(stdout_path), str(stderr_path)
+
+    @staticmethod
+    def _tail_file(path: str, max_chars: int = 4000) -> str:
+        try:
+            text = Path(path).read_text(encoding="utf-8", errors="replace")
+        except FileNotFoundError:
+            return ""
+        if len(text) <= max_chars:
+            return text.strip()
+        return text[-max_chars:].strip()
+
+    def _log_gpx_exit(self, label: str, proc: subprocess.Popen, stdout_path: str, stderr_path: str) -> None:
+        stdout = self._tail_file(stdout_path)
+        stderr = self._tail_file(stderr_path)
+        logger.error(f"GPX player [{label}] exited early with code={proc.returncode}")
+        logger.error(f"GPX player [{label}] stdout log: {stdout_path}")
+        logger.error(f"GPX player [{label}] stderr log: {stderr_path}")
+        if stdout:
+            logger.error(f"GPX player [{label}] stdout tail:\n{stdout}")
+        if stderr:
+            logger.error(f"GPX player [{label}] stderr tail:\n{stderr}")
+
     def _create_gpx_file(self, latitude: float, longitude: float) -> str:
         """
         Generate a long-duration single-location GPX file.
@@ -89,7 +137,7 @@ class LocationController:
         t1 = datetime.utcnow()
         t2 = t1 + timedelta(hours=24)
         gpx_content = f"""<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="Marcel Location Simulator"
+<gpx version="1.1" creator="iGPS"
      xmlns="http://www.topografix.com/GPX/1/1"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
@@ -146,7 +194,7 @@ class LocationController:
         """
         from datetime import datetime, timedelta
         gpx_content = """<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="Marcel Location Simulator"
+<gpx version="1.1" creator="iGPS"
      xmlns="http://www.topografix.com/GPX/1/1"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
@@ -224,18 +272,14 @@ class LocationController:
             logger.debug(f"GPX file created: {gpx_file}")
 
             cmd = [
-                "pymobiledevice3", "developer", "dvt",
+                sys.executable, "-m", "pymobiledevice3", "developer", "dvt",
                 "simulate-location", "play"
             ] + rsd_args + [gpx_file]
 
             logger.debug(f"Executing command: {' '.join(cmd)}")
 
             # Start NEW process FIRST — eliminates the GPS snap-back gap
-            new_process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
+            new_process, stdout_path, stderr_path = self._start_gpx_player(cmd, "teleport")
 
             # Give new process ~150 ms to establish before swapping
             time.sleep(0.15)
@@ -257,6 +301,7 @@ class LocationController:
                 return True
             else:
                 logger.error("Location spoofing process exited prematurely")
+                self._log_gpx_exit("teleport", new_process, stdout_path, stderr_path)
                 try:
                     Path(gpx_file).unlink()
                 except Exception:
@@ -282,7 +327,7 @@ class LocationController:
                 return False
 
             cmd = [
-                "pymobiledevice3", "developer", "dvt",
+                sys.executable, "-m", "pymobiledevice3", "developer", "dvt",
                 "simulate-location", "clear"
             ] + rsd_args
 
@@ -432,23 +477,21 @@ class LocationController:
                 return False
 
             cmd = [
-                "pymobiledevice3", "developer", "dvt",
+                sys.executable, "-m", "pymobiledevice3", "developer", "dvt",
                 "simulate-location", "play"
             ] + rsd_args + [gpx_file]
 
             logger.debug(f"Executing command: {' '.join(cmd)}")
 
             with self._process_lock:
-                self._location_process = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
+                self._location_process, stdout_path, stderr_path = self._start_gpx_player(cmd, "route")
 
             time.sleep(0.5)
 
             if not self._location_process or self._location_process.poll() is not None:
                 logger.error("Failed to start route playback process")
+                if self._location_process:
+                    self._log_gpx_exit("route", self._location_process, stdout_path, stderr_path)
                 try:
                     Path(gpx_file).unlink()
                 except Exception:
@@ -486,10 +529,9 @@ class LocationController:
                         base = remaining[0][2]
                         remaining = [(lat, lon, t - base) for lat, lon, t in remaining]
                         restart_gpx = self._create_route_gpx_file(remaining)
-                        self._location_process = subprocess.Popen(
-                            cmd[:cmd.index(gpx_file)] + [restart_gpx],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL
+                        restart_cmd = cmd[:cmd.index(gpx_file)] + [restart_gpx]
+                        self._location_process, stdout_path, stderr_path = self._start_gpx_player(
+                            restart_cmd, "route-restart"
                         )
                         gpx_file = restart_gpx
                         time.sleep(0.3)
@@ -626,23 +668,21 @@ class LocationController:
                 return False
 
             cmd = [
-                "pymobiledevice3", "developer", "dvt",
+                sys.executable, "-m", "pymobiledevice3", "developer", "dvt",
                 "simulate-location", "play"
             ] + rsd_args + [gpx_file]
 
             logger.debug(f"Executing command: {' '.join(cmd)}")
 
             with self._process_lock:
-                self._location_process = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
+                self._location_process, stdout_path, stderr_path = self._start_gpx_player(cmd, "roam")
 
             time.sleep(0.5)
 
             if not self._location_process or self._location_process.poll() is not None:
                 logger.error("Failed to start roam playback process")
+                if self._location_process:
+                    self._log_gpx_exit("roam", self._location_process, stdout_path, stderr_path)
                 try:
                     Path(gpx_file).unlink()
                 except Exception:
@@ -668,8 +708,11 @@ class LocationController:
 
                 with self._process_lock:
                     if self._location_process is None or self._location_process.poll() is not None:
-                        logger.info("Roam GPX player process ended.")
-                        break
+                        logger.error("Roam GPX player process ended before planned duration.")
+                        if self._location_process:
+                            self._log_gpx_exit("roam", self._location_process, stdout_path, stderr_path)
+                        self._is_simulating = False
+                        return False
 
                 movement_elapsed += delta
                 if movement_elapsed >= total_time:

@@ -1,7 +1,7 @@
 """
-Input Validation Utilities - Marcel Location Simulator
+Input Validation Utilities - iGPS
 Validate and sanitize geographic values, speed, updates, files, and names.
-Created by Marcel Afsar
+Created by Marcel Afsar (原作者)
 """
 
 import re

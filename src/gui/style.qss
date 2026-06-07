@@ -71,13 +71,14 @@ QLabel#battery_label {
    INPUTS
    ============================================ */
 QLineEdit, QDoubleSpinBox, QSpinBox, QComboBox {
-    background-color: rgba(13, 17, 26, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 10px;
+    background-color: rgba(10, 14, 22, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
     padding: 8px 12px;
-    color: #F8FAFC;
+    color: #E2E8F0;
     selection-background-color: #3B82F6;
     font-size: 13px;
+    font-weight: 500;
 }
 
 QLineEdit:focus, QDoubleSpinBox:focus, QSpinBox:focus, QComboBox:focus {
@@ -236,18 +237,34 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
 /* ============================================
    COMBOBOX DROPDOWN
    ============================================ */
-QComboBox QAbstractItemView {
-    background-color: #1A2131;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+QComboBox QAbstractItemView, QListView#dark_combo_popup {
+    background-color: #14181F;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     selection-background-color: #3B82F6;
-    color: #F8FAFC;
+    selection-color: #FFFFFF;
+    color: #E2E8F0;
     outline: none;
     border-radius: 8px;
-    padding: 6px;
+    padding: 6px 4px;
+    font-size: 13px;
+}
+QComboBox QAbstractItemView::item, QListView#dark_combo_popup::item {
+    padding: 8px 12px;
+    min-height: 32px;
+    border-radius: 4px;
+}
+QComboBox QAbstractItemView::item:hover, QListView#dark_combo_popup::item:hover, QListView#dark_combo_popup::item:selected {
+    background-color: rgba(255,255,255,0.05);
 }
 QComboBox::drop-down {
     border: none;
     width: 28px;
+    subcontrol-position: right center;
+    subcontrol-origin: padding;
+}
+QComboBox::down-arrow {
+    width: 12px;
+    height: 12px;
 }
 
 /* ============================================
@@ -284,7 +301,7 @@ QMessageBox QPushButton {
 /* ============================================
    GPS HUD CARD & FLOATING CONTROLS
    ============================================ */
-QWidget#gps_hud_card {
+QWidget#map_status_card {
     background-color: rgba(21, 27, 40, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
@@ -310,23 +327,34 @@ QLabel#gps_hud_details {
     font-weight: 500;
 }
 
-QPushButton#focus_btn, QPushButton#track_btn {
-    background-color: rgba(21, 27, 40, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
-    color: #F8FAFC;
-    font-weight: 600;
+QLabel#map_status_title {
+    color: #C7D2FE;
     font-size: 12px;
-    padding: 0 12px;
+    font-weight: 700;
 }
 
-QPushButton#focus_btn:hover, QPushButton#track_btn:hover {
-    background-color: #1E293B;
-    border-color: #3B82F6;
+QLabel#map_status_line {
+    color: #CBD5E1;
+    font-size: 12px;
+    font-weight: 500;
 }
 
-QPushButton#track_btn:checked {
-    background-color: rgba(59, 130, 246, 0.15);
-    border-color: #3B82F6;
-    color: #3B82F6;
+QPushButton#interrupt_pin_btn {
+    background-color: rgba(239, 68, 68, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: #FFFFFF;
+    font-weight: 700;
+    min-height: 30px;
+}
+
+QPushButton#interrupt_pin_btn:hover {
+    background-color: #F87171;
+}
+
+
+/* Native popup cleanup */
+QComboBox QFrame {
+    background-color: #14181F;
+    border: none;
 }

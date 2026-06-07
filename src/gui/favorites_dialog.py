@@ -1,7 +1,7 @@
 """
-Favorites Dialog - Marcel Location Simulator
+Favorites Dialog - iGPS
 Manage favorite saved locations and categories in English.
-Created by Marcel Afsar
+Created by Marcel Afsar (原作者)
 """
 
 from PyQt6.QtWidgets import (

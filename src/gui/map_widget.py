@@ -1,6 +1,6 @@
 """
 Map Widget - Flicker-free Leaflet map served via localhost HTTP to bypass file:// tile restrictions
-Created by Marcel Afsar
+Created by Marcel Afsar (原作者)
 """
 
 import json
@@ -12,7 +12,7 @@ from typing import List, Tuple, Optional
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineSettings
-from PyQt6.QtCore import QUrl, pyqtSignal
+from PyQt6.QtCore import QUrl, pyqtSignal, QTimer
 from loguru import logger
 
 
@@ -34,14 +34,18 @@ class MapWidget(QWidget):
     """Full-screen Leaflet map widget — served from localhost to allow tile loading"""
 
     # Signals: emit (latitude, longitude)
+    map_clicked = pyqtSignal(float, float)
     location_clicked = pyqtSignal(float, float)
     destination_clicked = pyqtSignal(float, float)
+    coordinate_clicked = pyqtSignal(float, float)
+    coordinate_context_menu_requested = pyqtSignal(float, float)
+    mouse_moved = pyqtSignal(float, float)
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.center_lat = 40.7128
-        self.center_lon = -74.0060
+        self.center_lat = 22.7826
+        self.center_lon = 120.4038
         self.zoom = 15
         self._is_loaded = False
         self._pending_commands: List[str] = []
@@ -133,7 +137,11 @@ class MapWidget(QWidget):
     def _on_console_message(self, message: str):
         """Receive JavaScript messages via console.log interception"""
         try:
-            if message.startswith("CLICK:START:") or message.startswith("DRAG:START:"):
+            if message.startswith("CLICK:START:"):
+                coords_str = message.split(":", 2)[2]
+                lat, lon = map(float, coords_str.split(","))
+                self.map_clicked.emit(lat, lon)
+            elif message.startswith("DRAG:START:"):
                 coords_str = message.split(":", 2)[2]
                 lat, lon = map(float, coords_str.split(","))
                 self.location_clicked.emit(lat, lon)
@@ -141,6 +149,24 @@ class MapWidget(QWidget):
                 coords_str = message.split(":", 2)[2]
                 lat, lon = map(float, coords_str.split(","))
                 self.destination_clicked.emit(lat, lon)
+            elif message.startswith("CLICK:INSPECT:"):
+                coords_str = message.split(":", 2)[2]
+                lat, lon = map(float, coords_str.split(","))
+                # If within ~200m of the last inspected spot, show context menu instead
+                if hasattr(self, '_last_inspect'):
+                    import math
+                    dlat = lat - self._last_inspect[0]
+                    dlon = lon - self._last_inspect[1]
+                    dist = math.sqrt(dlat*dlat + dlon*dlon) * 111000
+                    if dist < 200:
+                        self.coordinate_context_menu_requested.emit(lat, lon)
+                        return
+                self._last_inspect = (lat, lon)
+                self.coordinate_clicked.emit(lat, lon)
+            elif message.startswith("MOUSE:MOVE:"):
+                coords_str = message.split(":", 2)[2]
+                lat, lon = map(float, coords_str.split(","))
+                self.mouse_moved.emit(lat, lon)
         except Exception as e:
             logger.error(f"Error parsing map coordinates: {e}")
 
@@ -161,11 +187,23 @@ class MapWidget(QWidget):
 
     def add_marker(self, latitude: float, longitude: float,
                    label: str = "", color: str = "blue", popup: Optional[str] = None):
-        """Update the current position marker"""
+        """Update the current phone position marker."""
         self.run_js(f"updateCurrentPosition({latitude}, {longitude});")
 
+    def add_start_marker(self, latitude: float, longitude: float):
+        """Mark a planned route start without moving the phone."""
+        self.run_js(f"setStartPoint({latitude}, {longitude});")
+
+    def set_destination_marker(self, latitude: float, longitude: float):
+        """Mark a planned route destination."""
+        self.run_js(f"setDestination({latitude}, {longitude});")
+
+    def add_coordinate_marker(self, latitude: float, longitude: float):
+        """Mark an inspected coordinate from right-click."""
+        self.run_js(f"markCoordinate({latitude}, {longitude});")
+
     def clear_markers(self):
-        """Clear all markers and routes"""
+        """Clear planned overlays; current phone marker is preserved by clearMap()."""
         self.run_js("clearMap();")
 
     def add_route_line(self, coordinates: List[Tuple[float, float]],
@@ -188,7 +226,12 @@ class MapWidget(QWidget):
 
     def refresh_map(self):
         """No-op for backwards compatibility"""
-        pass
+        self.run_js("if (map) { map.invalidateSize(false); }")
+
+    def resizeEvent(self, event):
+        """Tell Leaflet its viewport changed after Qt resizes the web view."""
+        super().resizeEvent(event)
+        QTimer.singleShot(0, self.refresh_map)
 
     def show_route(self, waypoints: List[Tuple[float, float]],
                    show_markers: bool = True, auto_fit: bool = True):
