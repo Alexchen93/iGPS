@@ -1,48 +1,48 @@
 # iGPS — iPhone GPS Location Simulator for Linux
 
-Based on [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator), rewritten and enhanced for Linux.
+[English](#english) | [中文](README_zh.md)
 
-> 基於 marcelafsar/iphone-location-simulator，專為 Linux 環境改寫與增強的 iPhone GPS 定位控制台。
+Based on [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator), rewritten and enhanced for Linux.
 
 ## Original Author
 
 **Marcel Afsar** — [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator)
 
-## Features / 功能
+## Features
 
 - iPhone GPS location simulation via `pymobiledevice3` (iOS 17+ DVT / RSD tunnel)
 - Route planning with address search (walking / cycling / driving / highway)
-- Area roaming (continuous movement within a radius)
-- Joystick directional control
-- Location freeze / reset
-- Collapsible sidebar with SVG icons
+- Area roaming — continuous movement within a configurable radius
+- Joystick directional micro-control
+- Location freeze / reset / restore real GPS
+- Collapsible sidebar with SVG vector icons
+- Right-click context menu on map (teleport / set start / set destination)
 - Dark-themed QComboBox dropdowns
-- Right-click context menu on map
-- Auto-cleanup on exit (tunneld + port release)
+- Auto-cleanup on GUI close (tunneld + port release via `trap EXIT`)
 
-## Tech Stack / 技術棧
+## Tech Stack
 
-| Layer | Tech |
+| Layer | Technology |
 |---|---|
 | Language | Python 3.12 |
 | GUI | PyQt6 + QtWebEngine (Leaflet.js) |
-| Device | pymobiledevice3 |
+| Device control | pymobiledevice3 |
 | Map tiles | OpenStreetMap / CartoDB |
 | Platform | Linux (tested on Ubuntu 24.04) |
 
-## Quick Start / 快速開始
+## Quick Start
 
 ```bash
 # Start (auto-setup RSD tunnel + launch GUI)
 ./start.sh
 
-# Diagnostics only (no launch)
+# Diagnostics only
 ./start.sh --check
 ```
 
-Close the GUI window to automatically clean up all processes.
+Close the GUI window → all processes are automatically cleaned up.
 
-## Requirements / 需求
+## Requirements
 
 - Linux (Ubuntu 24.04 tested)
 - Python 3.12+
@@ -50,25 +50,49 @@ Close the GUI window to automatically clean up all processes.
 - USB connection
 - `sudo` access (tunneld requires root)
 
-## Project Structure / 專案結構
+## Project Structure
 
 ```
 src/
 ├── main.py                    # Entry point
 ├── gui/
-│   ├── main_window.py         # Main window + layout
-│   ├── control_panel.py       # Sidebar navigation + 4 sub-pages
-│   ├── map_widget.py          # QtWebEngine + Leaflet bridge
+│   ├── main_window.py         # Main window + left/right split layout
+│   ├── control_panel.py       # Sidebar nav + 4 sub-pages
+│   ├── map_widget.py          # QtWebEngine + Leaflet JS bridge
 │   ├── map_template.html      # Leaflet map HTML/JS
-│   ├── style.qss              # Global dark theme
-│   └── icons/                 # SVG vector icons (25)
+│   ├── style.qss              # Global dark theme stylesheet
+│   └── icons/                 # 25 SVG vector icons
 ├── core/
-│   ├── device_manager.py      # iPhone connection (tunnel/RSD)
-│   ├── location_controller.py # GPX generation + pymobiledevice3
-│   ├── coordinate_utils.py    # Distance calculation
+│   ├── device_manager.py      # iPhone connection (RSD tunnel)
+│   ├── location_controller.py # GPX generation + location execution
+│   ├── coordinate_utils.py    # Geodesic distance calculation
 │   └── route_generator.py     # Route waypoint generation
 └── utils/
     ├── config_manager.py      # config.yaml loader
-    ├── logger.py              # Logging setup
+    ├── logger.py              # Loguru log setup
     └── gpx_handler.py         # GPX file I/O
+
+tests/
+└── test_imports.py            # Smoke tests (5/5)
 ```
+
+## UI Layout
+
+```
+┌──────────────┬──────────────────────────┐
+│  device bar  │                          │
+│ [connect][◀] │                          │
+├──────────────┤       🗺️ Map             │
+│  sidebar nav │                          │
+│  (4 pages)   │                          │
+│  ⚫ 定位路線  │        [status card]     │
+│  ⚫ 區域漫遊  │                          │
+│  ⚫ 搖桿控制  │                          │
+│  ⚫ 系統控制  │                          │
+└──────────────┴──────────────────────────┘
+   520px fixed       fills remaining
+```
+
+## License
+
+MIT — see original [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator)
