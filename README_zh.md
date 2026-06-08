@@ -37,6 +37,8 @@ graph TD
     I --> J[iPhone 13]
 ```
 
+> **Note:** If the diagram shows raw code, GitHub's dark-theme Mermaid renderer has a known bug. Switch to [light theme](https://github.com/settings/appearance) or open [diagram.mmd](docs/diagram.mmd).
+
 **Data flow:** Map click → coordinates → GPX waypoints → DVT protocol → iPhone GPS spoofed.
 
 ## 與眾不同之處
