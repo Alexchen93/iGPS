@@ -29,15 +29,15 @@ graph TD
     B --> D[Leaflet Map]
     C --> E[LocationController]
     D --> E
-    D --> F[RouteFetcher / OSRM]
+    D --> F[RouteFetcher]
     E --> G[GPX Builder]
     F --> G
     E --> H[DeviceManager]
     H --> I[pymobiledevice3]
-    I --> J[ iPhone 13 ]
+    I --> J[iPhone 13]
 ```
 
-**Data flow:** User clicks map, coordinates, GPX waypoints generated, sent to iPhone via DVT protocol over RSD tunnel, iPhone GPS spoofed.
+**Data flow:** Map click → coordinates → GPX waypoints → DVT protocol → iPhone GPS spoofed.
 
 ## What Makes It Different
 
