@@ -2,97 +2,53 @@
 
 [English](README.md) | [中文](#中文)
 
-基於 [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator) 改寫，專為 Linux 環境優化與增強。
+從 Linux 桌面控制 iPhone GPS 定位的強大工具。路線模擬、區域漫遊、搖桿控制 — 全部透過直覺的地圖介面操作。
 
-## 原作者
+> 基於 [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator) 由 **Marcel Afsar** 原作，專為 Linux 改寫與增強。
 
-**Marcel Afsar** — [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator)
+---
 
-## 功能
+## 為什麼選擇 iGPS？
 
-- 透過 `pymobiledevice3` 模擬 iPhone GPS 定位（iOS 17+ DVT / RSD tunnel）
-- 路線規劃：地址搜尋、步行 / 騎車 / 開車 / 高速公路模式
-- 區域漫遊：在指定半徑內持續移動，可拔線運作
-- 搖桿方向微調
-- 位置凍結 / 重置 / 恢復真實 GPS
-- 折疊式側欄導航（SVG 向量圖示）
-- 地圖右鍵選單（手機定位 / 設為起點 / 設為終點）
-- 深色主題 QComboBox 下拉選單
-- 關閉 GUI 自動清理（tunneld + port 釋放）
-
-## 技術棧
-
-| 層 | 技術 |
+| 特色 | 說明 |
 |---|---|
-| 語言 | Python 3.12 |
-| GUI | PyQt6 + QtWebEngine (Leaflet.js) |
-| 裝置控制 | pymobiledevice3 |
-| 地圖圖磚 | OpenStreetMap / CartoDB |
-| 平台 | Linux（Ubuntu 24.04 測試） |
+| **地圖直覺操作** | 在地圖上點擊即可設定路線，不需手打座標 |
+| **真實道路模擬** | 透過 OSRM 貼合實際道路移動，支援開車 / 騎車 / 步行 / 高速公路 |
+| **區域漫遊** | 手機在指定半徑內自然移動，可拔線持續運作 |
+| **搖桿微調** | D-pad 或鍵盤方向鍵逐步調整位置 |
+| **凍結與固定** | 鎖定手機在任何位置，停止模擬也不會跳回真實 GPS |
+| **一鍵啟動** | `./start.sh` 自動處理 tunnel、port、GUI 全部 |
+| **關閉即清理** | 關閉 GUI 視窗 → 自動終止所有背景程序 |
+
+## 與眾不同之處
+
+- **Linux 原生** — Ubuntu 24.04 完整測試，不需 VM、Wine 或 macOS
+- **iOS 17+ 支援** — 使用 Apple 最新 DVT 協議，透過 RSD tunnel 通訊
+- **折疊側欄** — 4 個子頁面搭配 SVG 圖示，可折疊釋放螢幕空間
+- **右鍵選單** — 右鍵查詢座標，再點一次彈出選單：定位 / 設起點 / 設終點
+- **全深色主題** — 每個下拉選單、選單、面板在 Linux GTK 下都保持深色
+- **自我診斷** — `./start.sh --check` 檢查 USB、開發者模式、tunnel 狀態
 
 ## 快速開始
 
 ```bash
-# 啟動（自動建立 RSD tunnel + 啟動 GUI）
-./start.sh
-
-# 僅診斷，不啟動
-./start.sh --check
+./start.sh           # 一鍵啟動
+./start.sh --check   # 僅診斷，不啟動
 ```
 
-關閉 GUI 視窗後所有程序自動清理。
+關閉 GUI 後自動釋放所有資源。
 
 ## 需求
 
 - Linux（Ubuntu 24.04 已測試）
 - Python 3.12+
-- iPhone 已開啟開發者模式
-- USB 連線
-- `sudo` 權限（tunneld 需要 root）
+- iPhone 已開啟開發者模式 + USB 連線
+- `sudo` 權限
 
-## 專案結構
+## 原作者
 
-```
-src/
-├── main.py                    # 程式進入點
-├── gui/
-│   ├── main_window.py         # 主視窗 + 左右分欄佈局
-│   ├── control_panel.py       # 側欄導航 + 4 個子頁面
-│   ├── map_widget.py          # QtWebEngine + Leaflet JS 橋接
-│   ├── map_template.html      # Leaflet 地圖 HTML/JS
-│   ├── style.qss              # 全域深色主題樣式
-│   └── icons/                 # 25 個 SVG 向量圖示
-├── core/
-│   ├── device_manager.py      # iPhone 連線管理（RSD tunnel）
-│   ├── location_controller.py # GPX 生成 + 定位執行
-│   ├── coordinate_utils.py    # 地理距離計算
-│   └── route_generator.py     # 路線節點生成
-└── utils/
-    ├── config_manager.py      # config.yaml 讀取器
-    ├── logger.py              # Loguru 日誌設定
-    └── gpx_handler.py         # GPX 檔案讀寫
-
-tests/
-└── test_imports.py            # 基本冒煙測試（5/5 pass）
-```
-
-## 介面佈局
-
-```
-┌──────────────┬──────────────────────────┐
-│  裝置狀態列   │                          │
-│ [連線] [◀]   │                          │
-├──────────────┤       🗺️ 地圖             │
-│  側欄導航     │                          │
-│  (4 頁)      │                          │
-│  ⚫ 定位路線  │        [狀態面板]         │
-│  ⚫ 區域漫遊  │                          │
-│  ⚫ 搖桿控制  │                          │
-│  ⚫ 系統控制  │                          │
-└──────────────┴──────────────────────────┘
-   520px 固定      剩餘空間填滿
-```
+**Marcel Afsar** — [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator)
 
 ## 授權
 
-MIT — 參見原始專案 [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator)
+MIT

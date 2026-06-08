@@ -2,97 +2,53 @@
 
 [English](#english) | [中文](README_zh.md)
 
-Based on [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator), rewritten and enhanced for Linux.
+A powerful desktop tool to control your iPhone's GPS location from Linux. Route simulation, area roaming, joystick control — all from an intuitive map-based UI.
 
-## Original Author
+> Based on [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator) by **Marcel Afsar**, rewritten and enhanced for Linux.
 
-**Marcel Afsar** — [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator)
+---
 
-## Features
+## Why iGPS?
 
-- iPhone GPS location simulation via `pymobiledevice3` (iOS 17+ DVT / RSD tunnel)
-- Route planning with address search (walking / cycling / driving / highway)
-- Area roaming — continuous movement within a configurable radius
-- Joystick directional micro-control
-- Location freeze / reset / restore real GPS
-- Collapsible sidebar with SVG vector icons
-- Right-click context menu on map (teleport / set start / set destination)
-- Dark-themed QComboBox dropdowns
-- Auto-cleanup on GUI close (tunneld + port release via `trap EXIT`)
-
-## Tech Stack
-
-| Layer | Technology |
+| Feature | What it does for you |
 |---|---|
-| Language | Python 3.12 |
-| GUI | PyQt6 + QtWebEngine (Leaflet.js) |
-| Device control | pymobiledevice3 |
-| Map tiles | OpenStreetMap / CartoDB |
-| Platform | Linux (tested on Ubuntu 24.04) |
+| **Map-first design** | Click anywhere on the map to set waypoints — no typing coordinates |
+| **Road-snapped routing** | Follows real streets via OSRM, not straight lines. Car, bike, walk, or highway |
+| **Area roaming** | Your phone wanders naturally within a radius — walk away and it keeps moving |
+| **Joystick micro-control** | Fine-tune position step by step with D-pad or keyboard arrows |
+| **Freeze & pin** | Lock your phone at any spot. Stop mid-simulation without reverting to real GPS |
+| **One-click start** | `./start.sh` handles everything: tunnel setup, port cleanup, GUI launch |
+| **Auto-cleanup** | Close the GUI → all background processes automatically terminated |
+
+## What Makes It Different
+
+- **Linux native** — fully tested on Ubuntu 24.04. No VM, no Wine, no macOS required
+- **iOS 17+ ready** — uses Apple's latest DVT protocol via RSD tunnel (`pymobiledevice3`)
+- **Collapsible sidebar** — 4 sub-pages with SVG icons. Collapse to save screen space
+- **Right-click context menu** — inspect coordinates, then right-click again to teleport or set route points
+- **Dark theme throughout** — every dropdown, menu, and panel stays dark even on Linux GTK
+- **Self-diagnosing** — `./start.sh --check` verifies USB, Developer Mode, and tunnel status
 
 ## Quick Start
 
 ```bash
-# Start (auto-setup RSD tunnel + launch GUI)
-./start.sh
-
-# Diagnostics only
-./start.sh --check
+./start.sh           # One command to launch everything
+./start.sh --check   # Diagnostics only
 ```
 
-Close the GUI window → all processes are automatically cleaned up.
+Close the GUI → all resources automatically freed.
 
 ## Requirements
 
 - Linux (Ubuntu 24.04 tested)
 - Python 3.12+
-- iPhone with Developer Mode enabled
-- USB connection
+- iPhone with Developer Mode enabled + USB connection
 - `sudo` access (tunneld requires root)
 
-## Project Structure
+## Original Author
 
-```
-src/
-├── main.py                    # Entry point
-├── gui/
-│   ├── main_window.py         # Main window + left/right split layout
-│   ├── control_panel.py       # Sidebar nav + 4 sub-pages
-│   ├── map_widget.py          # QtWebEngine + Leaflet JS bridge
-│   ├── map_template.html      # Leaflet map HTML/JS
-│   ├── style.qss              # Global dark theme stylesheet
-│   └── icons/                 # 25 SVG vector icons
-├── core/
-│   ├── device_manager.py      # iPhone connection (RSD tunnel)
-│   ├── location_controller.py # GPX generation + location execution
-│   ├── coordinate_utils.py    # Geodesic distance calculation
-│   └── route_generator.py     # Route waypoint generation
-└── utils/
-    ├── config_manager.py      # config.yaml loader
-    ├── logger.py              # Loguru log setup
-    └── gpx_handler.py         # GPX file I/O
-
-tests/
-└── test_imports.py            # Smoke tests (5/5)
-```
-
-## UI Layout
-
-```
-┌──────────────┬──────────────────────────┐
-│  device bar  │                          │
-│ [connect][◀] │                          │
-├──────────────┤       🗺️ Map             │
-│  sidebar nav │                          │
-│  (4 pages)   │                          │
-│  ⚫ 定位路線  │        [status card]     │
-│  ⚫ 區域漫遊  │                          │
-│  ⚫ 搖桿控制  │                          │
-│  ⚫ 系統控制  │                          │
-└──────────────┴──────────────────────────┘
-   520px fixed       fills remaining
-```
+**Marcel Afsar** — [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator)
 
 ## License
 
-MIT — see original [marcelafsar/iphone-location-simulator](https://github.com/marcelafsar/iphone-location-simulator)
+MIT
