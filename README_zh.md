@@ -23,30 +23,24 @@
 ## How It Works
 
 ```mermaid
-flowchart TD
-    A[./start.sh] -->|sudo verify + tunnel| B[iGPS GUI]
+flowchart LR
+    A[start.sh] --> B[iGPS GUI]
 
-    B --> C[ControlPanel<br/>Route / Roam / Joystick / System]
-    B --> D[Leaflet Map<br/>Click • Right-click • Markers]
+    B --> C[Control Panel]
+    B --> D[Leaflet Map]
 
-    C --> E[LocationController]
+    C --> E[Location Controller]
     D --> E
-    D --> F[RouteFetcher<br/>OSRM road routing]
+    D --> F[Route Fetcher / OSRM]
 
-    E --> G[GPX Builder<br/>GPX file generation]
+    E --> G[GPX Builder]
     F --> G
 
-    E --> H[DeviceManager<br/>RSD tunnel • Device pairing]
+    E --> H[Device Manager]
 
-    H --> I[pymobiledevice3<br/>DVT protocol • CLI bridge]
+    H --> I[pymobiledevice3]
 
-    I -->|USB| J{{iPhone 13<br/>iOS 26.6}}
-
-    style A fill:#4f46e5,color:#fff
-    style B fill:#1e293b,color:#e2e8f0
-    style J fill:#000,color:#34c759,stroke:#34c759
-    style I fill:#6366f1,color:#fff
-    style H fill:#475569,color:#e2e8f0
+    I --> J((iPhone 13))
 ```
 
 **Data flow:** User clicks map → coordinates → GPX waypoints generated → sent to iPhone via DVT protocol over RSD tunnel → iPhone GPS spoofed.
