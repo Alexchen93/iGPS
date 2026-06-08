@@ -23,27 +23,21 @@ A powerful desktop tool to control your iPhone's GPS location from Linux. Route 
 ## How It Works
 
 ```mermaid
-flowchart LR
+graph TD
     A[start.sh] --> B[iGPS GUI]
-
-    B --> C[Control Panel]
+    B --> C[ControlPanel]
     B --> D[Leaflet Map]
-
-    C --> E[Location Controller]
+    C --> E[LocationController]
     D --> E
-    D --> F[Route Fetcher / OSRM]
-
+    D --> F[RouteFetcher / OSRM]
     E --> G[GPX Builder]
     F --> G
-
-    E --> H[Device Manager]
-
+    E --> H[DeviceManager]
     H --> I[pymobiledevice3]
-
-    I --> J((iPhone 13))
+    I --> J[ iPhone 13 ]
 ```
 
-**Data flow:** User clicks map → coordinates → GPX waypoints generated → sent to iPhone via DVT protocol over RSD tunnel → iPhone GPS spoofed.
+**Data flow:** User clicks map, coordinates, GPX waypoints generated, sent to iPhone via DVT protocol over RSD tunnel, iPhone GPS spoofed.
 
 ## What Makes It Different
 
