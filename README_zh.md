@@ -20,6 +20,47 @@
 | **一鍵啟動** | `./start.sh` 自動處理 tunnel、port、GUI 全部 |
 | **關閉即清理** | 關閉 GUI 視窗 → 自動終止所有背景程序 |
 
+## How It Works
+
+```
+                    ┌─────────────────────────────────────────┐
+                    │              start.sh                    │
+                    │   sudo verify → tunnel → GUI launch     │
+                    └────────────────┬────────────────────────┘
+                                     │
+              ┌──────────────────────┴──────────────────────┐
+              │                  iGPS GUI                    │
+              │  ┌─────────────┐  ┌────────────────────────┐ │
+              │  │  Sidebar     │  │     Leaflet Map        │ │
+              │  │  · Route     │  │  · Click to set points │ │
+              │  │  · Roam      │  │  · Right-click menu    │ │
+              │  │  · Joystick  │  │  · Status overlay      │ │
+              │  │  · System    │  │                        │ │
+              │  └──────┬───────┘  └───────────┬────────────┘ │
+              └─────────┼──────────────────────┼──────────────┘
+                        │                      │
+         ┌──────────────┴──────┐    ┌──────────┴──────────┐
+         │  LocationController │    │    RouteFetcher      │
+         │  · GPX generation   │    │  · OSRM road routing │
+         │  · Process control  │    │  · Waypoint sequence │
+         │  · Coordinate utils │    │                      │
+         └──────────┬──────────┘    └─────────────────────┘
+                    │
+         ┌──────────┴──────────┐
+         │   DeviceManager     │
+         │  · RSD tunnel mgmt  │
+         │  · Device pairing   │
+         │  · Connection state │
+         └──────────┬──────────┘
+                    │
+         ┌──────────┴──────────┐
+         │  pymobiledevice3    │         ════════════════
+         │  · CLI bridge       │  ────▶  ║  iPhone 13   ║
+         │  · DVT protocol     │   USB   ║  (iOS 26.6)  ║
+         │  · GPX player       │         ════════════════
+         └─────────────────────┘
+```
+
 ## 與眾不同之處
 
 - **Linux 原生** — Ubuntu 24.04 完整測試，不需 VM、Wine 或 macOS

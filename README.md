@@ -20,6 +20,47 @@ A powerful desktop tool to control your iPhone's GPS location from Linux. Route 
 | **One-click start** | `./start.sh` handles everything: tunnel setup, port cleanup, GUI launch |
 | **Auto-cleanup** | Close the GUI → all background processes automatically terminated |
 
+## How It Works
+
+```
+                    ┌─────────────────────────────────────────┐
+                    │              start.sh                    │
+                    │   sudo verify → tunnel → GUI launch     │
+                    └────────────────┬────────────────────────┘
+                                     │
+              ┌──────────────────────┴──────────────────────┐
+              │                  iGPS GUI                    │
+              │  ┌─────────────┐  ┌────────────────────────┐ │
+              │  │  Sidebar     │  │     Leaflet Map        │ │
+              │  │  · Route     │  │  · Click to set points │ │
+              │  │  · Roam      │  │  · Right-click menu    │ │
+              │  │  · Joystick  │  │  · Status overlay      │ │
+              │  │  · System    │  │                        │ │
+              │  └──────┬───────┘  └───────────┬────────────┘ │
+              └─────────┼──────────────────────┼──────────────┘
+                        │                      │
+         ┌──────────────┴──────┐    ┌──────────┴──────────┐
+         │  LocationController │    │    RouteFetcher      │
+         │  · GPX generation   │    │  · OSRM road routing │
+         │  · Process control  │    │  · Waypoint sequence │
+         │  · Coordinate utils │    │                      │
+         └──────────┬──────────┘    └─────────────────────┘
+                    │
+         ┌──────────┴──────────┐
+         │   DeviceManager     │
+         │  · RSD tunnel mgmt  │
+         │  · Device pairing   │
+         │  · Connection state │
+         └──────────┬──────────┘
+                    │
+         ┌──────────┴──────────┐
+         │  pymobiledevice3    │         ════════════════
+         │  · CLI bridge       │  ────▶  ║  iPhone 13   ║
+         │  · DVT protocol     │   USB   ║  (iOS 26.6)  ║
+         │  · GPX player       │         ════════════════
+         └─────────────────────┘
+```
+
 ## What Makes It Different
 
 - **Linux native** — fully tested on Ubuntu 24.04. No VM, no Wine, no macOS required
