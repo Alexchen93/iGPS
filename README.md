@@ -22,44 +22,34 @@ A powerful desktop tool to control your iPhone's GPS location from Linux. Route 
 
 ## How It Works
 
+```mermaid
+flowchart TD
+    A[./start.sh] -->|sudo verify + tunnel| B[iGPS GUI]
+
+    B --> C[ControlPanel<br/>Route / Roam / Joystick / System]
+    B --> D[Leaflet Map<br/>Click • Right-click • Markers]
+
+    C --> E[LocationController]
+    D --> E
+    D --> F[RouteFetcher<br/>OSRM road routing]
+
+    E --> G[GPX Builder<br/>GPX file generation]
+    F --> G
+
+    E --> H[DeviceManager<br/>RSD tunnel • Device pairing]
+
+    H --> I[pymobiledevice3<br/>DVT protocol • CLI bridge]
+
+    I -->|USB| J{{iPhone 13<br/>iOS 26.6}}
+
+    style A fill:#4f46e5,color:#fff
+    style B fill:#1e293b,color:#e2e8f0
+    style J fill:#000,color:#34c759,stroke:#34c759
+    style I fill:#6366f1,color:#fff
+    style H fill:#475569,color:#e2e8f0
 ```
-                    ┌─────────────────────────────────────────┐
-                    │              start.sh                    │
-                    │   sudo verify → tunnel → GUI launch     │
-                    └────────────────┬────────────────────────┘
-                                     │
-              ┌──────────────────────┴──────────────────────┐
-              │                  iGPS GUI                    │
-              │  ┌─────────────┐  ┌────────────────────────┐ │
-              │  │  Sidebar     │  │     Leaflet Map        │ │
-              │  │  · Route     │  │  · Click to set points │ │
-              │  │  · Roam      │  │  · Right-click menu    │ │
-              │  │  · Joystick  │  │  · Status overlay      │ │
-              │  │  · System    │  │                        │ │
-              │  └──────┬───────┘  └───────────┬────────────┘ │
-              └─────────┼──────────────────────┼──────────────┘
-                        │                      │
-         ┌──────────────┴──────┐    ┌──────────┴──────────┐
-         │  LocationController │    │    RouteFetcher      │
-         │  · GPX generation   │    │  · OSRM road routing │
-         │  · Process control  │    │  · Waypoint sequence │
-         │  · Coordinate utils │    │                      │
-         └──────────┬──────────┘    └─────────────────────┘
-                    │
-         ┌──────────┴──────────┐
-         │   DeviceManager     │
-         │  · RSD tunnel mgmt  │
-         │  · Device pairing   │
-         │  · Connection state │
-         └──────────┬──────────┘
-                    │
-         ┌──────────┴──────────┐
-         │  pymobiledevice3    │         ════════════════
-         │  · CLI bridge       │  ────▶  ║  iPhone 13   ║
-         │  · DVT protocol     │   USB   ║  (iOS 26.6)  ║
-         │  · GPX player       │         ════════════════
-         └─────────────────────┘
-```
+
+**Data flow:** User clicks map → coordinates → GPX waypoints generated → sent to iPhone via DVT protocol over RSD tunnel → iPhone GPS spoofed.
 
 ## What Makes It Different
 
